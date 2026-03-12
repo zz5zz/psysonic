@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-03-12
+
+### Added
+- **Album Downloads**: Support for downloading entire albums with real-time progress tracking.
+
+### Fixed
+- **Linux GPU Compatibility**: Patched AppImage to disable DMABUF renderer, fixing EGL/GPU crashes on older hardware.
+- **CI/CD Reliability**: Optimized release workflow with split jobs for better stability across platforms.
+
 ## [1.0.3] - 2026-03-12
 
 ### Fixed

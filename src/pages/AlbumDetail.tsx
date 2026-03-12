@@ -106,7 +106,7 @@ export default function AlbumDetail() {
   const [bio, setBio] = useState<string | null>(null);
   const [bioOpen, setBioOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [isStarred, setIsStarred] = useState(false);
   const [starredSongs, setStarredSongs] = useState<Set<string>>(new Set());
 
@@ -174,13 +174,33 @@ export default function AlbumDetail() {
   };
 
   const handleDownload = async (albumName: string, albumId: string) => {
-    setDownloading(true);
+    setDownloadProgress(0);
     try {
       const url = buildDownloadUrl(albumId);
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const blob = await response.blob();
 
+      const contentLength = response.headers.get('Content-Length');
+      const total = contentLength ? parseInt(contentLength, 10) : 0;
+      const chunks: Uint8Array<ArrayBuffer>[] = [];
+
+      if (total && response.body) {
+        const reader = response.body.getReader();
+        let received = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          setDownloadProgress(Math.round((received / total) * 100));
+        }
+      } else {
+        const buffer = await response.arrayBuffer() as ArrayBuffer;
+        chunks.push(new Uint8Array(buffer));
+        setDownloadProgress(100);
+      }
+
+      const blob = new Blob(chunks);
       if (auth.downloadFolder) {
         const buffer = await blob.arrayBuffer();
         const path = await join(auth.downloadFolder, `${sanitizeFilename(albumName)}.zip`);
@@ -197,8 +217,10 @@ export default function AlbumDetail() {
       }
     } catch (e) {
       console.error('Download failed:', e);
+      setDownloadProgress(null);
     } finally {
-      setDownloading(false);
+      // keep bar visible at 100% for 3 seconds so user sees completion
+      setTimeout(() => setDownloadProgress(null), 60000);
     }
   };
 
@@ -320,9 +342,19 @@ export default function AlbumDetail() {
                 <button className="btn btn-ghost" id="album-bio-btn" onClick={handleBio}>
                   <ExternalLink size={16} /> {t('albumDetail.artistBio')}
                 </button>
-                <button className="btn btn-ghost" id="album-download-btn" onClick={() => handleDownload(info.name, info.id)} disabled={downloading}>
-                  <Download size={16} /> {downloading ? t('albumDetail.downloading') : t('albumDetail.download')}
-                </button>
+                {downloadProgress !== null ? (
+                  <div className="download-progress-wrap">
+                    <Download size={14} />
+                    <div className="download-progress-bar">
+                      <div className="download-progress-fill" style={{ width: `${downloadProgress}%` }} />
+                    </div>
+                    <span className="download-progress-pct">{downloadProgress}%</span>
+                  </div>
+                ) : (
+                  <button className="btn btn-ghost" id="album-download-btn" onClick={() => handleDownload(info.name, info.id)}>
+                    <Download size={16} /> {t('albumDetail.download')}
+                  </button>
+                )}
               </div>
             </div>
           </div>

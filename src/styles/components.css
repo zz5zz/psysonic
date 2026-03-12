@@ -465,7 +465,39 @@
   text-decoration: underline;
 }
 .album-detail-info { display: flex; gap: var(--space-3); color: var(--text-muted); font-size: 13px; margin: var(--space-2) 0 var(--space-4); }
-.album-detail-actions { display: flex; gap: var(--space-3); }
+.album-detail-actions { display: flex; gap: var(--space-3); align-items: center; }
+
+.download-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  min-width: 180px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.download-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.download-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ctp-mauve), var(--ctp-blue));
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+.download-progress-pct {
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ─ Tracklist ─ */
 .tracklist { padding: 0 var(--space-6) var(--space-6); }
