@@ -3,7 +3,7 @@ import AlbumCard from '../components/AlbumCard';
 import { getAlbumList, SubsonicAlbum } from '../api/subsonic';
 import { useTranslation } from 'react-i18next';
 
-type SortType = 'alphabeticalByName' | 'alphabeticalByArtist' | 'newest' | 'random';
+type SortType = 'alphabeticalByName' | 'alphabeticalByArtist';
 
 export default function Albums() {
   const { t } = useTranslation();
@@ -55,8 +55,6 @@ export default function Albums() {
   const sortOptions: { value: SortType; label: string }[] = [
     { value: 'alphabeticalByName', label: t('albums.sortByName') },
     { value: 'alphabeticalByArtist', label: t('albums.sortByArtist') },
-    { value: 'newest', label: t('albums.sortNewest') },
-    { value: 'random', label: t('albums.sortRandom') },
   ];
 
   return (

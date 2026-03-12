@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import { SubsonicAlbum, buildCoverArtUrl } from '../api/subsonic';
+import { SubsonicAlbum, buildCoverArtUrl, coverArtCacheKey } from '../api/subsonic';
 import { usePlayerStore } from '../store/playerStore';
+import CachedImage from './CachedImage';
 
 interface AlbumCardProps {
   album: SubsonicAlbum;
@@ -37,7 +38,7 @@ export default function AlbumCard({ album }: AlbumCardProps) {
     >
       <div className="album-card-cover">
         {coverUrl ? (
-          <img src={coverUrl} alt={`${album.name} Cover`} loading="lazy" />
+          <CachedImage src={coverUrl} cacheKey={coverArtCacheKey(album.coverArt!, 300)} alt={`${album.name} Cover`} loading="lazy" />
         ) : (
           <div className="album-card-cover-placeholder">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -1,12 +1,35 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getArtists, SubsonicArtist, buildCoverArtUrl } from '../api/subsonic';
-import { Users, LayoutGrid, List } from 'lucide-react';
+import { getArtists, SubsonicArtist } from '../api/subsonic';
+import { LayoutGrid, List } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { useTranslation } from 'react-i18next';
 
 const ALL_SENTINEL = 'ALL';
 const ALPHABET = [ALL_SENTINEL, '#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+
+// Catppuccin accent colors — one is picked deterministically from the artist name
+const CTP_COLORS = [
+  'var(--ctp-rosewater)', 'var(--ctp-flamingo)', 'var(--ctp-pink)',    'var(--ctp-mauve)',
+  'var(--ctp-red)',       'var(--ctp-maroon)',    'var(--ctp-peach)',   'var(--ctp-yellow)',
+  'var(--ctp-green)',     'var(--ctp-teal)',      'var(--ctp-sky)',     'var(--ctp-sapphire)',
+  'var(--ctp-blue)',      'var(--ctp-lavender)',
+];
+
+function nameColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return CTP_COLORS[h % CTP_COLORS.length];
+}
+
+function nameInitial(name: string): string {
+  // Skip leading non-letter chars (punctuation, numbers, brackets, …)
+  const letter = name.match(/[a-zA-ZÀ-ÖØ-öø-ÿ]/)?.[0];
+  if (letter) return letter.toUpperCase();
+  // Fallback: first alphanumeric (e.g. "1349")
+  const alnum = name.match(/[a-zA-Z0-9]/)?.[0];
+  return alnum?.toUpperCase() ?? '?';
+}
 
 export default function Artists() {
   const { t } = useTranslation();
@@ -124,7 +147,7 @@ export default function Artists() {
       {!loading && viewMode === 'grid' && (
         <div className="album-grid-wrap">
           {visible.map(artist => {
-            const coverId = artist.coverArt || artist.id;
+            const color = nameColor(artist.name);
             return (
               <div
                 key={artist.id}
@@ -135,21 +158,8 @@ export default function Artists() {
                   openContextMenu(e.clientX, e.clientY, artist, 'artist');
                 }}
               >
-                <div className="artist-card-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
-                  {coverId ? (
-                    <img
-                      src={buildCoverArtUrl(coverId, 200)}
-                      alt=""
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement?.classList.add('fallback-visible');
-                      }}
-                    />
-                  ) : (
-                    <Users size={32} />
-                  )}
-                  <Users size={32} className="fallback-icon" style={{ display: coverId ? 'none' : 'block', position: 'absolute' }} />
+                <div className="artist-card-avatar artist-card-avatar-initial" style={{ borderColor: color }}>
+                  <span style={{ color }}>{nameInitial(artist.name)}</span>
                 </div>
                 <div>
                   <div className="artist-card-name">{artist.name}</div>
@@ -170,7 +180,7 @@ export default function Artists() {
               <h3 className="letter-heading">{letter}</h3>
               <div className="artist-list">
                 {groups[letter].map(artist => {
-                  const coverId = artist.coverArt || artist.id;
+                  const color = nameColor(artist.name);
                   return (
                     <button
                       key={artist.id}
@@ -182,21 +192,8 @@ export default function Artists() {
                       }}
                       id={`artist-${artist.id}`}
                     >
-                      <div className="artist-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
-                        {coverId ? (
-                          <img
-                            src={buildCoverArtUrl(coverId, 100)}
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement?.classList.add('fallback-visible');
-                            }}
-                          />
-                        ) : (
-                          <Users size={18} />
-                        )}
-                        <Users size={18} className="fallback-icon" style={{ display: coverId ? 'none' : 'block', position: 'absolute' }} />
+                      <div className="artist-avatar artist-avatar-initial" style={{ borderColor: color }}>
+                        <span style={{ color }}>{nameInitial(artist.name)}</span>
                       </div>
                       <div style={{ textAlign: 'left' }}>
                         <div className="artist-name">{artist.name}</div>

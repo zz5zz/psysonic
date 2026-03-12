@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-03-12
+
+### Added
+- **Image Caching**: Integrated IndexedDB-based image caching for cover art and artist images, providing significantly faster loading times for frequently accessed items.
+- **Improved Artist Discovery**: Faster scrolling in the Artists list using color-coded initial-based avatars for quick visual identification.
+- **Random Albums**: New discovery page for exploring your library with random album selections.
+- **Help & Documentation**: Added a dedicated help page for better user onboarding.
+
+### Changed
+- **Optimized UI**: Instant "Now Playing" status updates via local state filtering for a more responsive experience.
+- **Enhanced Data Flow**: General performance improvements in server communication and state management.
+
 ## [1.0.4] - 2026-03-12
 
 ### Added

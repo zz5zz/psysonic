@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Music, List, Square, Repeat, Repeat1, Maximize2
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { buildCoverArtUrl } from '../api/subsonic';
+import { buildCoverArtUrl, coverArtCacheKey } from '../api/subsonic';
+import CachedImage from './CachedImage';
 import { useTranslation } from 'react-i18next';
 
 function formatTime(seconds: number): string {
@@ -18,6 +19,8 @@ export default function PlayerBar() {
   const { currentTrack, isPlaying, progress, currentTime, volume, togglePlay, next, previous, seek, setVolume, isQueueVisible, toggleQueue, stop, toggleRepeat, repeatMode, toggleFullscreen } = usePlayerStore();
 
   const duration = currentTrack?.duration ?? 0;
+  const coverSrc = useMemo(() => currentTrack?.coverArt ? buildCoverArtUrl(currentTrack.coverArt, 128) : '', [currentTrack?.coverArt]);
+  const coverKey = currentTrack?.coverArt ? coverArtCacheKey(currentTrack.coverArt, 128) : '';
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     seek(parseFloat(e.target.value));
@@ -45,11 +48,11 @@ export default function PlayerBar() {
           data-tooltip={currentTrack ? t('player.openFullscreen') : undefined}
         >
           {currentTrack?.coverArt ? (
-            <img
+            <CachedImage
               className="player-album-art"
-              src={buildCoverArtUrl(currentTrack.coverArt, 128)}
+              src={coverSrc}
+              cacheKey={coverKey}
               alt={`${currentTrack.album} Cover`}
-              loading="lazy"
             />
           ) : (
             <div className="player-album-art-placeholder">

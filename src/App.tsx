@@ -21,6 +21,8 @@ import AlbumDetail from './pages/AlbumDetail';
 import LabelAlbums from './pages/LabelAlbums';
 import Statistics from './pages/Statistics';
 import Playlists from './pages/Playlists';
+import Help from './pages/Help';
+import RandomAlbums from './pages/RandomAlbums';
 import FullscreenPlayer from './components/FullscreenPlayer';
 import ContextMenu from './components/ContextMenu';
 import { useAuthStore } from './store/authStore';
@@ -142,6 +144,7 @@ function AppShell() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/albums" element={<Albums />} />
+            <Route path="/random-albums" element={<RandomAlbums />} />
             <Route path="/album/:id" element={<AlbumDetail />} />
             <Route path="/artists" element={<Artists />} />
             <Route path="/artist/:id" element={<ArtistDetail />} />
@@ -152,6 +155,7 @@ function AppShell() {
             <Route path="/label/:name" element={<LabelAlbums />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/help" element={<Help />} />
           </Routes>
         </div>
       </main>

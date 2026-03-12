@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Disc3, Users, Music4, Radio, Settings, Heart, BarChart3, Shuffle, ListMusic,
-  PanelLeftClose, PanelLeft
+  PanelLeftClose, PanelLeft, HelpCircle, Dices
 } from 'lucide-react';
 
 const PsysonicLogo = () => (
@@ -13,7 +13,8 @@ const PsysonicLogo = () => (
 const navItems = [
   { icon: Disc3, labelKey: 'sidebar.mainstage', to: '/' },
   { icon: Radio, labelKey: 'sidebar.newReleases', to: '/new-releases' },
-  { icon: Music4, labelKey: 'sidebar.allAlbums', to: '/albums' },
+  { icon: Music4,  labelKey: 'sidebar.allAlbums',    to: '/albums' },
+  { icon: Dices,   labelKey: 'sidebar.randomAlbums', to: '/random-albums' },
   { icon: Users, labelKey: 'sidebar.artists', to: '/artists' },
   { icon: ListMusic, labelKey: 'sidebar.playlists', to: '/playlists' },
   { icon: Shuffle, labelKey: 'sidebar.randomMix', to: '/random-mix' },
@@ -68,6 +69,14 @@ export default function Sidebar({
         >
           <BarChart3 size={isCollapsed ? 22 : 18} />
           {!isCollapsed && <span>{t('sidebar.statistics')}</span>}
+        </NavLink>
+        <NavLink
+          to="/help"
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          title={isCollapsed ? t('sidebar.help') : undefined}
+        >
+          <HelpCircle size={isCollapsed ? 22 : 18} />
+          {!isCollapsed && <span>{t('sidebar.help')}</span>}
         </NavLink>
         <NavLink
           to="/settings"

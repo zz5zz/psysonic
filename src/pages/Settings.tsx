@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Wifi, WifiOff, Globe, Music2, Sliders, LogOut, CheckCircle2, FolderOpen, Palette, Server, Plus, Trash2, Eye, EyeOff
+  Wifi, WifiOff, Globe, Music2, Sliders, LogOut, CheckCircle2, FolderOpen, Palette, Server, Plus, Trash2, Eye, EyeOff, Info, ExternalLink
 } from 'lucide-react';
+import { open as openUrl } from '@tauri-apps/plugin-shell';
 import { useAuthStore, ServerProfile } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { pingWithCredentials } from '../api/subsonic';
@@ -351,6 +352,56 @@ export default function Settings() {
         <button className="btn btn-ghost" style={{ color: 'var(--danger)' }} onClick={handleLogout} id="settings-logout-btn">
           <LogOut size={16} /> {t('settings.logout')}
         </button>
+      </section>
+
+      {/* About */}
+      <section className="settings-section">
+        <div className="settings-section-header">
+          <Info size={18} />
+          <h2>{t('settings.aboutTitle')}</h2>
+        </div>
+        <div className="settings-card settings-about">
+          <div className="settings-about-header">
+            <img src="/logo.png" width={52} height={52} alt="Psysonic" style={{ borderRadius: 14 }} />
+            <div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Psysonic
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {t('settings.aboutVersion')} 1.0.5
+              </div>
+            </div>
+          </div>
+
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '1rem 0 0.5rem' }}>
+            {t('settings.aboutDesc')}
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0.5rem 0' }}>
+            {t('settings.aboutFeatures')}
+          </p>
+
+          <div className="divider" style={{ margin: '1rem 0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: 13 }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', minWidth: 56 }}>{t('settings.aboutLicense')}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('settings.aboutLicenseText')}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', minWidth: 56 }}>Stack</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('settings.aboutBuiltWith')}</span>
+            </div>
+          </div>
+
+          <button
+            className="btn btn-ghost"
+            style={{ marginTop: '1.25rem', alignSelf: 'flex-start' }}
+            onClick={() => openUrl('https://github.com/Psychotoxical/psysonic')}
+          >
+            <ExternalLink size={14} />
+            {t('settings.aboutRepo')}
+          </button>
+        </div>
       </section>
     </div>
   );

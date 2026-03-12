@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArtist, getArtistInfo, getTopSongs, getSimilarSongs2, SubsonicArtist, SubsonicAlbum, SubsonicSong, SubsonicArtistInfo, buildCoverArtUrl, star, unstar } from '../api/subsonic';
+import { getArtist, getArtistInfo, getTopSongs, getSimilarSongs2, SubsonicArtist, SubsonicAlbum, SubsonicSong, SubsonicArtistInfo, buildCoverArtUrl, coverArtCacheKey, star, unstar } from '../api/subsonic';
 import AlbumCard from '../components/AlbumCard';
+import CachedImage from '../components/CachedImage';
 import { ArrowLeft, Users, ExternalLink, Star, Play, Shuffle, Radio } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-shell';
 import { usePlayerStore } from '../store/playerStore';
@@ -158,11 +159,12 @@ export default function ArtistDetail() {
       <div className="artist-detail-header">
         <div className="artist-detail-avatar">
           {coverId ? (
-            <img
+            <CachedImage
               src={buildCoverArtUrl(coverId, 300)}
+              cacheKey={coverArtCacheKey(coverId, 300)}
               alt={artist.name}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={e => { e.currentTarget.style.display = 'none'; }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
             <Users size={64} color="var(--text-muted)" />
@@ -265,11 +267,12 @@ export default function ArtistDetail() {
                 <div className="track-num" style={{ textAlign: 'center' }}>{idx + 1}</div>
                 <div className="track-info" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   {song.coverArt && (
-                    <img
+                    <CachedImage
                       src={buildCoverArtUrl(song.coverArt, 64)}
+                      cacheKey={coverArtCacheKey(song.coverArt, 64)}
                       alt={song.album}
                       style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   )}
                   <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>

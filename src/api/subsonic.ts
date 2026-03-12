@@ -303,6 +303,12 @@ export function buildStreamUrl(id: string): string {
   return `${baseUrl}/rest/stream.view?${p.toString()}`;
 }
 
+/** Stable cache key for cover art — does not include ephemeral auth params. */
+export function coverArtCacheKey(id: string, size = 256): string {
+  const server = useAuthStore.getState().getActiveServer();
+  return `${server?.id ?? '_'}:cover:${id}:${size}`;
+}
+
 export function buildCoverArtUrl(id: string, size = 256): string {
   const { getBaseUrl, getActiveServer } = useAuthStore.getState();
   const server = getActiveServer();

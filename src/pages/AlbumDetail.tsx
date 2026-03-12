@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Play, Star, ExternalLink, X, ChevronLeft, Download, ListPlus } from 'lucide-react';
-import { getAlbum, getArtist, getArtistInfo, setRating, buildCoverArtUrl, buildDownloadUrl, star, unstar, SubsonicSong, SubsonicAlbum } from '../api/subsonic';
+import { Play, Star, ExternalLink, X, ChevronLeft, Download, ListPlus, Info } from 'lucide-react';
+import { getAlbum, getArtist, getArtistInfo, setRating, buildCoverArtUrl, coverArtCacheKey, buildDownloadUrl, star, unstar, SubsonicSong, SubsonicAlbum } from '../api/subsonic';
 import { usePlayerStore } from '../store/playerStore';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { open } from '@tauri-apps/plugin-shell';
 import { writeFile } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
 import AlbumCard from '../components/AlbumCard';
+import CachedImage, { useCachedUrl } from '../components/CachedImage';
 import { useTranslation } from 'react-i18next';
 
 function sanitizeFilename(name: string): string {
@@ -253,22 +254,28 @@ export default function AlbumDetail() {
     }
   };
 
+  // Hooks must be called unconditionally — derive from nullable album state
+  const coverUrl = album?.album.coverArt ? buildCoverArtUrl(album.album.coverArt, 400) : '';
+  const coverKey = album?.album.coverArt ? coverArtCacheKey(album.album.coverArt, 400) : '';
+  const resolvedCoverUrl = useCachedUrl(coverUrl, coverKey);
+
   if (loading) return <div className="loading-center"><div className="spinner" /></div>;
   if (!album) return <div className="empty-state">{t('albumDetail.notFound')}</div>;
 
   const { album: info, songs } = album;
-  const coverUrl = info.coverArt ? buildCoverArtUrl(info.coverArt, 400) : '';
   const totalDuration = songs.reduce((acc, s) => acc + s.duration, 0);
+  const hasVariousArtists = songs.some(s => s.artist !== info.artist);
+  const totalSize = songs.reduce((acc, s) => acc + (s.size ?? 0), 0);
 
   return (
     <div className="album-detail animate-fade-in">
       {bioOpen && bio && <BioModal bio={bio} onClose={() => setBioOpen(false)} />}
 
       <div className="album-detail-header">
-        {coverUrl && (
+        {resolvedCoverUrl && (
           <div
             className="album-detail-bg"
-            style={{ backgroundImage: `url(${coverUrl})` }}
+            style={{ backgroundImage: `url(${resolvedCoverUrl})` }}
             aria-hidden="true"
           />
         )}
@@ -280,7 +287,7 @@ export default function AlbumDetail() {
           </button>
           <div className="album-detail-hero">
             {coverUrl ? (
-              <img className="album-detail-cover" src={coverUrl} alt={`${info.name} Cover`} />
+              <CachedImage className="album-detail-cover" src={coverUrl} cacheKey={coverKey} alt={`${info.name} Cover`} />
             ) : (
               <div className="album-detail-cover album-cover-placeholder">♪</div>
             )}
@@ -352,9 +359,13 @@ export default function AlbumDetail() {
                   </div>
                 ) : (
                   <button className="btn btn-ghost" id="album-download-btn" onClick={() => handleDownload(info.name, info.id)}>
-                    <Download size={16} /> {t('albumDetail.download')}
+                    <Download size={16} /> {t('albumDetail.download')}{totalSize > 0 ? ` · ${formatSize(totalSize)}` : ''}
                   </button>
                 )}
+                <span className="download-hint">
+                  <Info size={12} />
+                  {t('albumDetail.downloadHintShort')}
+                </span>
               </div>
             </div>
           </div>
@@ -362,9 +373,10 @@ export default function AlbumDetail() {
       </div>
 
       <div className="tracklist">
-        <div className="tracklist-header">
+        <div className={`tracklist-header${hasVariousArtists ? ' tracklist-va' : ''}`}>
           <div style={{ textAlign: 'center' }}>#</div>
           <div>{t('albumDetail.trackTitle')}</div>
+          {hasVariousArtists && <div>{t('albumDetail.trackArtist')}</div>}
           <div>{t('albumDetail.trackFormat')}</div>
           <div style={{ textAlign: 'center' }}>{t('albumDetail.trackFavorite')}</div>
           <div>{t('albumDetail.trackRating')}</div>
@@ -392,7 +404,7 @@ export default function AlbumDetail() {
               {discs.get(discNum)!.map((song, i) => (
                 <div
                   key={song.id}
-                  className="track-row"
+                  className={`track-row${hasVariousArtists ? ' track-row-va' : ''}`}
                   onDoubleClick={() => handlePlaySong(song)}
                   onContextMenu={(e) => {
                     e.preventDefault();
@@ -418,10 +430,12 @@ export default function AlbumDetail() {
                   <div className="track-num" style={{ textAlign: 'center' }}>{song.track ?? i + 1}</div>
                   <div className="track-info">
                     <span className="track-title" data-tooltip={song.title}>{song.title}</span>
-                    {song.artist !== info.artist && (
-                      <span className="track-artist">{song.artist}</span>
-                    )}
                   </div>
+                  {hasVariousArtists && (
+                    <div className="track-artist-cell">
+                      <span className="track-artist">{song.artist}</span>
+                    </div>
+                  )}
                   <div className="track-meta" style={{ display: 'flex', alignItems: 'center' }}>
                     {(song.suffix || song.bitRate) && (
                       <span className="track-codec" style={{ marginTop: 0 }}>
@@ -452,10 +466,17 @@ export default function AlbumDetail() {
             </div>
           ));
         })()}
+
+        {/* Total row */}
+        <div className={`tracklist-total${hasVariousArtists ? ' tracklist-va' : ''}`}>
+          <span className="tracklist-total-label">{t('albumDetail.trackTotal')}</span>
+          <span className="tracklist-total-value">{formatDuration(totalDuration)}</span>
+        </div>
       </div>
 
       {relatedAlbums.length > 0 && (
         <div style={{ padding: '0 var(--space-6) var(--space-8)' }}>
+          <div style={{ borderTop: '1px solid var(--border-subtle)', marginBottom: '2rem' }} />
           <h2 className="section-title" style={{ marginBottom: '1rem' }}>{t('albumDetail.moreByArtist', { artist: info.artist })}</h2>
           <div className="album-grid-wrap">
             {relatedAlbums.map(a => <AlbumCard key={a.id} album={a} />)}

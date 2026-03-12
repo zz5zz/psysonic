@@ -4,7 +4,8 @@ import {
   ChevronDown, Repeat, Repeat1, Square, Music
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { buildCoverArtUrl } from '../api/subsonic';
+import { buildCoverArtUrl, coverArtCacheKey } from '../api/subsonic';
+import CachedImage, { useCachedUrl } from './CachedImage';
 import { useTranslation } from 'react-i18next';
 
 function formatTime(seconds: number): string {
@@ -63,20 +64,18 @@ const FsProgress = memo(function FsProgress({ duration }: { duration: number }) 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => seek(parseFloat(e.target.value)), [seek]);
 
   return (
-    <div className="fs-bottom">
-      <div className="fs-progress-wrap">
-        <span className="fs-time">{formatTime(currentTime)}</span>
-        <div className="fs-progress-bar">
-          <input
-            type="range" min={0} max={1} step={0.001}
-            value={progress}
-            onChange={handleSeek}
-            style={{ '--pct': `${progress * 100}%` } as React.CSSProperties}
-            aria-label="progress"
-          />
-        </div>
-        <span className="fs-time">{formatTime(duration)}</span>
+    <div className="fs-progress-wrap">
+      <span className="fs-time">{formatTime(currentTime)}</span>
+      <div className="fs-progress-bar">
+        <input
+          type="range" min={0} max={1} step={0.001}
+          value={progress}
+          onChange={handleSeek}
+          style={{ '--pct': `${progress * 100}%` } as React.CSSProperties}
+          aria-label="progress"
+        />
       </div>
+      <span className="fs-time">{formatTime(duration)}</span>
     </div>
   );
 });
@@ -112,9 +111,11 @@ export default function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
   const toggleRepeat = usePlayerStore(s => s.toggleRepeat);
   const playTrack    = usePlayerStore(s => s.playTrack);
 
-  const duration  = currentTrack?.duration ?? 0;
-  const coverUrl  = currentTrack?.coverArt ? buildCoverArtUrl(currentTrack.coverArt, 800) : '';
-  const upcoming  = queue.slice(queueIndex + 1, queueIndex + 15);
+  const duration    = currentTrack?.duration ?? 0;
+  const coverUrl    = currentTrack?.coverArt ? buildCoverArtUrl(currentTrack.coverArt, 800) : '';
+  const coverKey    = currentTrack?.coverArt ? coverArtCacheKey(currentTrack.coverArt, 800) : '';
+  const resolvedCoverUrl = useCachedUrl(coverUrl, coverKey);
+  const upcoming    = queue.slice(queueIndex + 1, queueIndex + 15);
 
   // Close on Escape
   useEffect(() => {
@@ -126,25 +127,58 @@ export default function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
   return (
     <div className="fs-player" role="dialog" aria-modal="true" aria-label={t('player.fullscreen')}>
       {/* Crossfading blurred background */}
-      <FsBg url={coverUrl} />
+      <FsBg url={resolvedCoverUrl} />
       <div className="fs-bg-overlay" aria-hidden="true" />
 
       {/* Close button */}
-      <button className="fs-close" onClick={onClose} aria-label={t('player.closeFullscreen')} data-tooltip={t('player.closeTooltip')}>
+      <button className="fs-close" onClick={onClose} aria-label={t('player.closeFullscreen')} data-tooltip={t('player.closeTooltip')} data-tooltip-pos="bottom">
         <ChevronDown size={28} />
       </button>
 
-      {/* Main layout: cover left, upcoming right */}
+      {/* Two-column layout: left = cover + info + controls, right = playlist */}
       <div className="fs-layout">
 
-        {/* Left column: cover only */}
+        {/* Left column */}
         <div className="fs-left">
           <div className="fs-cover-wrap">
             {coverUrl ? (
-              <img src={coverUrl} alt={`${currentTrack?.album} Cover`} className="fs-cover" />
+              <CachedImage src={coverUrl} cacheKey={coverKey} alt={`${currentTrack?.album} Cover`} className="fs-cover" />
             ) : (
               <div className="fs-cover fs-cover-placeholder"><Music size={72} /></div>
             )}
+          </div>
+
+          <div className="fs-track-info">
+            <h1 className="fs-title">{currentTrack?.title ?? '—'}</h1>
+            <p className="fs-artist">{currentTrack?.artist ?? '—'}</p>
+            <p className="fs-album">{currentTrack?.album ?? '—'}{currentTrack?.year ? ` · ${currentTrack.year}` : ''}</p>
+            {(currentTrack?.bitRate || currentTrack?.suffix) && (
+              <span className="fs-codec">
+                {[currentTrack.suffix?.toUpperCase(), currentTrack.bitRate ? `${currentTrack.bitRate} kbps` : ''].filter(Boolean).join(' · ')}
+              </span>
+            )}
+          </div>
+
+          <FsProgress duration={duration} />
+
+          <div className="fs-controls">
+            <button className="fs-btn fs-btn-sm" onClick={stop} data-tooltip="Stop">
+              <Square size={20} fill="currentColor" />
+            </button>
+            <button className="fs-btn" onClick={previous} aria-label={t('player.prev')}>
+              <SkipBack size={28} />
+            </button>
+            <FsPlayBtn />
+            <button className="fs-btn" onClick={next} aria-label={t('player.next')}>
+              <SkipForward size={28} />
+            </button>
+            <button
+              className={`fs-btn fs-btn-sm ${repeatMode !== 'off' ? 'active' : ''}`}
+              onClick={toggleRepeat}
+              data-tooltip={`${t('player.repeat')}: ${repeatMode === 'off' ? t('player.repeatOff') : repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOne')}`}
+            >
+              {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
+            </button>
           </div>
         </div>
 
@@ -160,7 +194,7 @@ export default function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
                   onClick={() => playTrack(track, queue)}
                 >
                   {track.coverArt ? (
-                    <img src={buildCoverArtUrl(track.coverArt, 80)} alt="" className="fs-upcoming-art" />
+                    <CachedImage src={buildCoverArtUrl(track.coverArt, 80)} cacheKey={coverArtCacheKey(track.coverArt, 80)} alt="" className="fs-upcoming-art" />
                   ) : (
                     <div className="fs-upcoming-art fs-upcoming-placeholder"><Music size={14} /></div>
                   )}
@@ -174,46 +208,6 @@ export default function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Bottom: meta + progress + controls — centered across full width */}
-      <div className="fs-footer">
-        <div className="fs-footer-main">
-          <div className="fs-track-info">
-            <h1 className="fs-title">{currentTrack?.title ?? '—'}</h1>
-            <p className="fs-artist">{currentTrack?.artist ?? '—'}</p>
-            <p className="fs-album">{currentTrack?.album ?? '—'}{currentTrack?.year ? ` · ${currentTrack.year}` : ''}</p>
-            {(currentTrack?.bitRate || currentTrack?.suffix) && (
-              <span className="fs-codec">
-                {[currentTrack.suffix?.toUpperCase(), currentTrack.bitRate ? `${currentTrack.bitRate} kbps` : ''].filter(Boolean).join(' · ')}
-              </span>
-            )}
-          </div>
-
-          {/* Progress bar — isolated sub-component */}
-          <FsProgress duration={duration} />
-        </div>
-
-        {/* Transport controls */}
-        <div className="fs-controls">
-          <button className="fs-btn fs-btn-sm" onClick={stop} data-tooltip="Stop">
-            <Square size={20} fill="currentColor" />
-          </button>
-          <button className="fs-btn" onClick={previous} aria-label={t('player.prev')}>
-            <SkipBack size={28} />
-          </button>
-          <FsPlayBtn />
-          <button className="fs-btn" onClick={next} aria-label={t('player.next')}>
-            <SkipForward size={28} />
-          </button>
-          <button
-            className={`fs-btn fs-btn-sm ${repeatMode !== 'off' ? 'active' : ''}`}
-            onClick={toggleRepeat}
-            data-tooltip={`${t('player.repeat')}: ${repeatMode === 'off' ? t('player.repeatOff') : repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOne')}`}
-          >
-            {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayCircle, User, Radio, RefreshCw } from 'lucide-react';
 import { getNowPlaying, SubsonicNowPlaying, buildCoverArtUrl } from '../api/subsonic';
+import { useAuthStore } from '../store/authStore';
+import { usePlayerStore } from '../store/playerStore';
 import { useTranslation } from 'react-i18next';
 
 export default function NowPlayingDropdown() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<SubsonicNowPlaying[]>([]);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const ownUsername = useAuthStore(s => s.getActiveServer()?.username ?? '');
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -22,10 +26,16 @@ export default function NowPlayingDropdown() {
     }
   };
 
+  // Poll in background so the badge stays current without opening the dropdown
   useEffect(() => {
-    if (isOpen) {
-      fetchNowPlaying();
-    }
+    fetchNowPlaying();
+    const id = setInterval(fetchNowPlaying, 10000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Refresh immediately when dropdown is opened
+  useEffect(() => {
+    if (isOpen) fetchNowPlaying();
   }, [isOpen]);
 
   // Click outside to close
@@ -39,6 +49,12 @@ export default function NowPlayingDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // For the current user, trust the local player state — the server keeps stale
+  // "now playing" entries for minutes after playback stops.
+  const visible = nowPlaying.filter(entry =>
+    entry.username === ownUsername ? isPlaying : true
+  );
+
   return (
     <div className="now-playing-dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
       <button
@@ -48,9 +64,9 @@ export default function NowPlayingDropdown() {
         data-tooltip-pos="bottom"
         style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
       >
-        <Radio size={18} className={nowPlaying.length > 0 ? 'animate-pulse' : ''} style={{ color: nowPlaying.length > 0 ? 'var(--accent)' : 'inherit' }} />
+        <Radio size={18} className={visible.length > 0 ? 'animate-pulse' : ''} style={{ color: visible.length > 0 ? 'var(--accent)' : 'inherit' }} />
         <span>Live</span>
-        {nowPlaying.length > 0 && (
+        {visible.length > 0 && (
           <span style={{
             background: 'var(--accent)',
             color: 'var(--ctp-crust)',
@@ -59,7 +75,7 @@ export default function NowPlayingDropdown() {
             padding: '2px 6px',
             borderRadius: '10px'
           }}>
-            {nowPlaying.length}
+            {visible.length}
           </span>
         )}
       </button>
@@ -94,17 +110,17 @@ export default function NowPlayingDropdown() {
             </button>
           </div>
 
-          {loading && nowPlaying.length === 0 ? (
+          {loading && visible.length === 0 ? (
             <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               {t('nowPlaying.loading')}
             </div>
-          ) : nowPlaying.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               {t('nowPlaying.nobody')}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {nowPlaying.map((stream, idx) => (
+              {visible.map((stream, idx) => (
                 <div key={`${stream.id}-${idx}`} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: 'var(--bg-hover)', padding: '0.5rem', borderRadius: '8px' }}>
                   <div style={{ width: '48px', height: '48px', flexShrink: 0, borderRadius: '6px', overflow: 'hidden', background: 'var(--bg-surface)' }}>
                     {stream.coverArt ? (
