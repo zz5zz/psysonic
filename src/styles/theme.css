@@ -580,8 +580,8 @@ body.is-dragging * {
 .input {
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  background: var(--ctp-surface0);
-  border: 1px solid var(--border);
+  background: var(--ctp-base);
+  border: 1px solid var(--ctp-overlay0);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-sans);

@@ -6,6 +6,7 @@ import { usePlayerStore } from '../store/playerStore';
 import { buildCoverArtUrl, coverArtCacheKey } from '../api/subsonic';
 import CachedImage from './CachedImage';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -16,6 +17,7 @@ function formatTime(seconds: number): string {
 
 export default function PlayerBar() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { currentTrack, isPlaying, progress, buffered, currentTime, volume, togglePlay, next, previous, seek, setVolume, isQueueVisible, toggleQueue, stop, toggleRepeat, repeatMode, toggleFullscreen } = usePlayerStore();
 
   const duration = currentTrack?.duration ?? 0;
@@ -68,10 +70,20 @@ export default function PlayerBar() {
           )}
         </div>
         <div className="player-track-meta">
-          <div className="player-track-name" data-tooltip={currentTrack?.title ?? ''}>
+          <div
+            className="player-track-name"
+            data-tooltip={currentTrack?.title ?? ''}
+            style={{ cursor: currentTrack?.albumId ? 'pointer' : 'default' }}
+            onClick={() => currentTrack?.albumId && navigate(`/album/${currentTrack.albumId}`)}
+          >
             {currentTrack?.title ?? t('player.noTitle')}
           </div>
-          <div className="player-track-artist" data-tooltip={currentTrack?.artist ?? ''}>
+          <div
+            className="player-track-artist"
+            data-tooltip={currentTrack?.artist ?? ''}
+            style={{ cursor: currentTrack?.artistId ? 'pointer' : 'default' }}
+            onClick={() => currentTrack?.artistId && navigate(`/artist/${currentTrack.artistId}`)}
+          >
             {currentTrack?.artist ?? '—'}
           </div>
         </div>

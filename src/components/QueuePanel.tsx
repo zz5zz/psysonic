@@ -4,6 +4,7 @@ import { Play, Music, Star, X, Trash2, Save, FolderOpen } from 'lucide-react';
 import { buildCoverArtUrl, getAlbum, getPlaylists, getPlaylist, createPlaylist, deletePlaylist, SubsonicPlaylist } from '../api/subsonic';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -111,6 +112,7 @@ function LoadPlaylistModal({ onClose, onLoad }: { onClose: () => void, onLoad: (
 
 export default function QueuePanel() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queue = usePlayerStore(s => s.queue);
   const queueIndex = usePlayerStore(s => s.queueIndex);
   const currentTrack = usePlayerStore(s => s.currentTrack);
@@ -169,35 +171,44 @@ export default function QueuePanel() {
   };
 
   const onDragEnd = () => {
-    isDraggingInternalRef.current = false;
-    draggedIdxRef.current = null;
-    dragOverIdxRef.current = null;
+    // Reset visual state immediately.
     setDraggedIdx(null);
     setDragOverIdx(null);
+    // Delay clearing refs so onDropQueue can read them first.
+    // On macOS WKWebView and Windows WebView2, dragend fires before drop
+    // (spec violation), so synchronously clearing refs here loses the
+    // drag source/destination indices before onDropQueue runs.
+    setTimeout(() => {
+      isDraggingInternalRef.current = false;
+      draggedIdxRef.current = null;
+      dragOverIdxRef.current = null;
+    }, 200);
   };
 
   const onDropQueue = async (e: React.DragEvent) => {
     e.preventDefault();
 
-    // Capture refs before resetting — dragend may have already cleared them on Mac.
+    // Refs are still valid here — onDragEnd delays clearing them so they survive
+    // the macOS/WebView2 dragend-before-drop race condition.
     const fromIdx = draggedIdxRef.current;
     const toIdx = dragOverIdxRef.current ?? queue.length;
 
+    // Cancel the pending timeout cleanup and clear refs immediately.
     isDraggingInternalRef.current = false;
     draggedIdxRef.current = null;
     dragOverIdxRef.current = null;
     setDraggedIdx(null);
     setDragOverIdx(null);
 
-    // Read dataTransfer — set during dragstart, outlives dragend on all platforms.
+    // Read dataTransfer — set during dragstart, survives dragend on all platforms.
+    // Used as fallback for fromIdx in case refs somehow weren't set.
     let parsedData: any = null;
     try {
       const raw = e.dataTransfer.getData('text/plain');
       if (raw) parsedData = JSON.parse(raw);
     } catch { /* ignore */ }
 
-    // Internal reorder: prefer ref value (fast path), fall back to dataTransfer
-    // for the Mac dragend-before-drop race condition.
+    // Internal reorder: refs are the primary source; dataTransfer is the fallback.
     const reorderFrom = fromIdx ?? (parsedData?.type === 'queue_reorder' ? parsedData.index : null);
     if (reorderFrom !== null) {
       if (reorderFrom !== toIdx) reorderQueue(reorderFrom, toIdx);
@@ -259,9 +270,19 @@ export default function QueuePanel() {
             )}
           </div>
           <div className="queue-current-info">
-            <h3 className="truncate" data-tooltip={currentTrack.title}>{currentTrack.title}</h3>
+            <h3
+              className="truncate"
+              data-tooltip={currentTrack.title}
+              style={{ cursor: currentTrack.albumId ? 'pointer' : 'default' }}
+              onClick={() => currentTrack.albumId && navigate(`/album/${currentTrack.albumId}`)}
+            >{currentTrack.title}</h3>
             {currentTrack.year && <div className="queue-current-sub">{currentTrack.year}</div>}
-            <div className="queue-current-sub truncate" data-tooltip={currentTrack.album}>{currentTrack.album}</div>
+            <div
+              className="queue-current-sub truncate"
+              data-tooltip={currentTrack.album}
+              style={{ cursor: currentTrack.artistId ? 'pointer' : 'default' }}
+              onClick={() => currentTrack.artistId && navigate(`/artist/${currentTrack.artistId}`)}
+            >{currentTrack.album}</div>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <div className="queue-current-tech">

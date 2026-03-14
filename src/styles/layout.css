@@ -29,7 +29,6 @@
   background: var(--accent);
 }
 
-.resizer-sidebar { left: calc(var(--sidebar-width) - 3px); }
 .resizer-queue { right: calc(var(--queue-width) - 3px); }
 
 /* ─── Sidebar ─── */

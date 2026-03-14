@@ -258,7 +258,8 @@ const enTranslation = {
     aboutLicenseText: 'MIT — free to use, modify, and distribute.',
     aboutRepo: 'Source Code on GitHub',
     aboutVersion: 'Version',
-    aboutBuiltWith: 'Built with Tauri · React · TypeScript · Howler.js'
+    aboutBuiltWith: 'Built with Tauri · React · TypeScript · Howler.js',
+    aboutAiCredit: 'Developed with the support of Claude Code by Anthropic'
   },
   help: {
     title: 'Help',
@@ -612,10 +613,11 @@ const deTranslation = {
     aboutDesc: 'Ein Desktop-Musikplayer für Subsonic-kompatible Server (Navidrome, Gonic u. a.). Streame deine selbst gehostete Musikbibliothek mit einer modernen Oberfläche im Catppuccin-Design.',
     aboutFeatures: 'Multi-Server · Scrobbling · Vollbild-Player · Album-Downloads · Bild-Cache · Catppuccin-Themes',
     aboutLicense: 'Lizenz',
-    aboutLicenseText: 'MIT — kostenlos nutzbar, veränderbar und weitergabbar.',
+    aboutLicenseText: 'MIT — kostenlos nutzbar, veränderbar und weiterzugeben.',
     aboutRepo: 'Quellcode auf GitHub',
     aboutVersion: 'Version',
-    aboutBuiltWith: 'Gebaut mit Tauri · React · TypeScript · Howler.js'
+    aboutBuiltWith: 'Gebaut mit Tauri · React · TypeScript · Howler.js',
+    aboutAiCredit: 'Mit freundlicher Unterstützung von Claude Code by Anthropic'
   },
   help: {
     title: 'Hilfe',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getRandomSongs, SubsonicSong, star, unstar } from '../api/subsonic';
 import { usePlayerStore } from '../store/playerStore';
-import { Play, HandMetal, RefreshCw } from 'lucide-react';
+import { Play, Star, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 function formatDuration(seconds: number): string {
@@ -133,7 +133,7 @@ export default function RandomMix() {
                   data-tooltip={starredSongs.has(song.id) ? t('randomMix.favoriteRemove') : t('randomMix.favoriteAdd')}
                   style={{ padding: '4px', height: 'auto', minHeight: 'unset', color: starredSongs.has(song.id) ? 'var(--accent)' : 'var(--text-muted)' }}
                 >
-                  <HandMetal size={14} fill={starredSongs.has(song.id) ? "currentColor" : "none"} />
+                  <Star size={14} fill={starredSongs.has(song.id) ? "currentColor" : "none"} />
                 </button>
               </div>
 

@@ -15,6 +15,43 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function MarqueeTitle({ title }: { title: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [scrollAmount, setScrollAmount] = useState(0);
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    const text = textRef.current;
+    if (!container || !text) return;
+    // Temporarily make span inline-block to get its natural width
+    text.style.display = 'inline-block';
+    const textWidth = text.getBoundingClientRect().width;
+    text.style.display = '';
+    const overflow = textWidth - container.clientWidth;
+    setScrollAmount(overflow > 4 ? Math.ceil(overflow) : 0);
+  }, []);
+
+  useEffect(() => {
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [title, measure]);
+
+  return (
+    <div ref={containerRef} className="fs-title-wrap">
+      <span
+        ref={textRef}
+        className={scrollAmount > 0 ? 'fs-title-marquee' : ''}
+        style={scrollAmount > 0 ? { '--scroll-amount': `-${scrollAmount}px` } as React.CSSProperties : {}}
+      >
+        {title}
+      </span>
+    </div>
+  );
+}
+
 // ─── Crossfading blurred background ───────────────────────────────────────────
 const FsBg = memo(function FsBg({ url }: { url: string }) {
   const [layers, setLayers] = useState<Array<{ url: string; id: number; visible: boolean }>>(() =>
@@ -173,7 +210,7 @@ export default function FullscreenPlayer({ onClose }: FullscreenPlayerProps) {
         </div>
 
         <div className="fs-track-info">
-          <h1 className="fs-title">{currentTrack?.title ?? '—'}</h1>
+          <MarqueeTitle title={currentTrack?.title ?? '—'} />
           <p className="fs-album">
             {currentTrack?.album ?? ''}
             {currentTrack?.year ? ` · ${currentTrack.year}` : ''}

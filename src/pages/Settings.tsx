@@ -374,7 +374,7 @@ export default function Settings() {
                 Psysonic
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {t('settings.aboutVersion')} 1.0.9
+                {t('settings.aboutVersion')} 1.0.10
               </div>
             </div>
           </div>
@@ -396,6 +396,10 @@ export default function Settings() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <span style={{ color: 'var(--text-muted)', minWidth: 56 }}>Stack</span>
               <span style={{ color: 'var(--text-secondary)' }}>{t('settings.aboutBuiltWith')}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', minWidth: 56 }}>AI</span>
+              <span style={{ color: 'var(--text-secondary)' }}>{t('settings.aboutAiCredit')}</span>
             </div>
           </div>
 

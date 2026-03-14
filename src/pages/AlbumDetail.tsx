@@ -31,11 +31,10 @@ function formatSize(bytes?: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function codecLabel(song: { suffix?: string; bitRate?: number; samplingRate?: number }): string {
+function codecLabel(song: { suffix?: string; bitRate?: number }): string {
   const parts: string[] = [];
   if (song.suffix) parts.push(song.suffix.toUpperCase());
   if (song.bitRate) parts.push(`${song.bitRate} kbps`);
-  if (song.samplingRate) parts.push(`${(song.samplingRate / 1000).toFixed(1)} kHz`);
   return parts.join(' · ');
 }
 
@@ -101,6 +100,7 @@ export default function AlbumDetail() {
   const playTrack = usePlayerStore(s => s.playTrack);
   const enqueue = usePlayerStore(s => s.enqueue);
   const openContextMenu = usePlayerStore(s => s.openContextMenu);
+  const currentTrack = usePlayerStore(s => s.currentTrack);
   const [album, setAlbum] = useState<Awaited<ReturnType<typeof getAlbum>> | null>(null);
   const [relatedAlbums, setRelatedAlbums] = useState<SubsonicAlbum[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -378,10 +378,10 @@ export default function AlbumDetail() {
           <div style={{ textAlign: 'center' }}>#</div>
           <div>{t('albumDetail.trackTitle')}</div>
           {hasVariousArtists && <div>{t('albumDetail.trackArtist')}</div>}
-          <div>{t('albumDetail.trackFormat')}</div>
           <div style={{ textAlign: 'center' }}>{t('albumDetail.trackFavorite')}</div>
           <div>{t('albumDetail.trackRating')}</div>
           <div style={{ textAlign: 'right' }}>{t('albumDetail.trackDuration')}</div>
+          <div>{t('albumDetail.trackFormat')}</div>
         </div>
 
         {(() => {
@@ -405,7 +405,7 @@ export default function AlbumDetail() {
               {discs.get(discNum)!.map((song, i) => (
                 <div
                   key={song.id}
-                  className={`track-row${hasVariousArtists ? ' track-row-va' : ''}`}
+                  className={`track-row${hasVariousArtists ? ' track-row-va' : ''}${currentTrack?.id === song.id ? ' active' : ''}`}
                   onMouseEnter={() => setHoveredSongId(song.id)}
                   onMouseLeave={() => setHoveredSongId(null)}
                   onDoubleClick={() => handlePlaySong(song)}
@@ -432,12 +432,14 @@ export default function AlbumDetail() {
                 >
                   <div
                     className="track-num"
-                    style={{ textAlign: 'center', cursor: hoveredSongId === song.id ? 'pointer' : 'default', color: hoveredSongId === song.id ? 'var(--accent)' : undefined }}
+                    style={{ textAlign: 'center', cursor: hoveredSongId === song.id ? 'pointer' : 'default', color: (hoveredSongId === song.id || currentTrack?.id === song.id) ? 'var(--accent)' : undefined }}
                     onClick={() => handlePlaySong(song)}
                   >
                     {hoveredSongId === song.id
                       ? <Play size={13} fill="currentColor" />
-                      : (song.track ?? i + 1)}
+                      : currentTrack?.id === song.id
+                        ? <Play size={13} fill="currentColor" />
+                        : (song.track ?? i + 1)}
                   </div>
                   <div className="track-info">
                     <span className="track-title" data-tooltip={song.title}>{song.title}</span>
@@ -447,14 +449,6 @@ export default function AlbumDetail() {
                       <span className="track-artist">{song.artist}</span>
                     </div>
                   )}
-                  <div className="track-meta" style={{ display: 'flex', alignItems: 'center' }}>
-                    {(song.suffix || song.bitRate) && (
-                      <span className="track-codec" style={{ marginTop: 0 }}>
-                        {codecLabel(song)}
-                        {song.size ? <span className="track-size"> · {formatSize(song.size)}</span> : null}
-                      </span>
-                    )}
-                  </div>
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <button
                       className="btn btn-ghost"
@@ -471,6 +465,13 @@ export default function AlbumDetail() {
                   />
                   <div className="track-duration" style={{ textAlign: 'right' }}>
                     {formatDuration(song.duration)}
+                  </div>
+                  <div className="track-meta" style={{ display: 'flex', alignItems: 'center' }}>
+                    {(song.suffix || song.bitRate) && (
+                      <span className="track-codec" style={{ marginTop: 0 }}>
+                        {codecLabel(song)}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

@@ -65,12 +65,10 @@ function AppShell() {
     fn();
   }, [currentTrack, isPlaying]);
 
-  const [sidebarWidth, setSidebarWidth] = useState(220);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('psysonic_sidebar_collapsed') === 'true';
   });
   const [queueWidth, setQueueWidth] = useState(300);
-  const [isDraggingSidebar, setIsDraggingSidebar] = useState(false);
   const [isDraggingQueue, setIsDraggingQueue] = useState(false);
 
   useEffect(() => {
@@ -78,24 +76,18 @@ function AppShell() {
   }, [isSidebarCollapsed]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDraggingSidebar) {
-      // Limit sidebar width between 180px and 400px
-      const newWidth = Math.max(180, Math.min(e.clientX, 400));
-      setSidebarWidth(newWidth);
-    } else if (isDraggingQueue) {
-      // Limit queue width between 250px and 500px. Queue is on the right.
+    if (isDraggingQueue) {
       const newWidth = Math.max(250, Math.min(window.innerWidth - e.clientX, 500));
       setQueueWidth(newWidth);
     }
-  }, [isDraggingSidebar, isDraggingQueue]);
+  }, [isDraggingQueue]);
 
   const handleMouseUp = useCallback(() => {
-    setIsDraggingSidebar(false);
     setIsDraggingQueue(false);
   }, []);
 
   useEffect(() => {
-    if (isDraggingSidebar || isDraggingQueue) {
+    if (isDraggingQueue) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'col-resize';
@@ -111,13 +103,13 @@ function AppShell() {
       window.removeEventListener('mouseup', handleMouseUp);
       document.body.classList.remove('is-dragging');
     };
-  }, [isDraggingSidebar, isDraggingQueue, handleMouseMove, handleMouseUp]);
+  }, [isDraggingQueue, handleMouseMove, handleMouseUp]);
 
   return (
     <div 
       className="app-shell"
-      style={{ 
-        '--sidebar-width': isSidebarCollapsed ? '72px' : `${sidebarWidth}px`,
+      style={{
+        '--sidebar-width': isSidebarCollapsed ? '72px' : 'clamp(180px, 15vw, 220px)',
         '--queue-width': isQueueVisible ? `${queueWidth}px` : '0px'
       } as React.CSSProperties}
       onContextMenu={e => e.preventDefault()}
@@ -125,14 +117,6 @@ function AppShell() {
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-      />
-      <div 
-        className="resizer resizer-sidebar" 
-        onMouseDown={(e) => {
-          e.preventDefault();
-          setIsDraggingSidebar(true);
-        }}
-        style={{ display: isSidebarCollapsed ? 'none' : 'block' }}
       />
       <main className="main-content">
         <header className="content-header">
