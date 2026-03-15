@@ -101,6 +101,7 @@ export default function AlbumDetail() {
   const enqueue = usePlayerStore(s => s.enqueue);
   const openContextMenu = usePlayerStore(s => s.openContextMenu);
   const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
   const [album, setAlbum] = useState<Awaited<ReturnType<typeof getAlbum>> | null>(null);
   const [relatedAlbums, setRelatedAlbums] = useState<SubsonicAlbum[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -379,8 +380,8 @@ export default function AlbumDetail() {
           <div>{t('albumDetail.trackTitle')}</div>
           {hasVariousArtists && <div>{t('albumDetail.trackArtist')}</div>}
           <div style={{ textAlign: 'center' }}>{t('albumDetail.trackFavorite')}</div>
-          <div>{t('albumDetail.trackRating')}</div>
-          <div style={{ textAlign: 'right' }}>{t('albumDetail.trackDuration')}</div>
+          <div style={{ textAlign: 'center' }}>{t('albumDetail.trackRating')}</div>
+          <div style={{ textAlign: 'center' }}>{t('albumDetail.trackDuration')}</div>
           <div>{t('albumDetail.trackFormat')}</div>
         </div>
 
@@ -435,11 +436,13 @@ export default function AlbumDetail() {
                     style={{ textAlign: 'center', cursor: hoveredSongId === song.id ? 'pointer' : 'default', color: (hoveredSongId === song.id || currentTrack?.id === song.id) ? 'var(--accent)' : undefined }}
                     onClick={() => handlePlaySong(song)}
                   >
-                    {hoveredSongId === song.id
+                    {hoveredSongId === song.id && currentTrack?.id !== song.id
                       ? <Play size={13} fill="currentColor" />
-                      : currentTrack?.id === song.id
-                        ? <Play size={13} fill="currentColor" />
-                        : (song.track ?? i + 1)}
+                      : currentTrack?.id === song.id && isPlaying
+                        ? <div className="eq-bars"><span className="eq-bar"/><span className="eq-bar"/><span className="eq-bar"/></div>
+                        : currentTrack?.id === song.id
+                          ? <Play size={13} fill="currentColor" />
+                          : (song.track ?? i + 1)}
                   </div>
                   <div className="track-info">
                     <span className="track-title" data-tooltip={song.title}>{song.title}</span>
@@ -463,7 +466,7 @@ export default function AlbumDetail() {
                     value={ratings[song.id] ?? song.userRating ?? 0}
                     onChange={r => handleRate(song.id, r)}
                   />
-                  <div className="track-duration" style={{ textAlign: 'right' }}>
+                  <div className="track-duration" style={{ textAlign: 'center' }}>
                     {formatDuration(song.duration)}
                   </div>
                   <div className="track-meta" style={{ display: 'flex', alignItems: 'center' }}>

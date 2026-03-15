@@ -72,20 +72,25 @@ export default function Sidebar({
 
   useEffect(() => {
     let cancelled = false;
-    const timer = setTimeout(async () => {
+
+    const check = async () => {
       try {
         const res = await fetch('https://api.github.com/repos/Psychotoxical/psysonic/releases/latest');
         if (!res.ok) return;
         const data = await res.json();
         const tag: string = data.tag_name ?? '';
         if (!cancelled && tag && isNewer(tag, appVersion)) {
-          setLatestVersion(tag.startsWith('v') ? tag : `v${tag}`);
+          setLatestVersion(tag.replace(/^v/i, ''));
         }
       } catch {
         // network unavailable — silently skip
       }
-    }, 1500);
-    return () => { cancelled = true; clearTimeout(timer); };
+    };
+
+    const initial = setTimeout(check, 1500);
+    const interval = setInterval(check, 10 * 60 * 1000); // every 10 minutes
+
+    return () => { cancelled = true; clearTimeout(initial); clearInterval(interval); };
   }, []);
 
   return (

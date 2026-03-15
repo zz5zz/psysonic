@@ -270,11 +270,10 @@
 /* ─── Player Bar ─── */
 .player-bar {
   grid-area: player;
-  display: grid;
-  grid-template-columns: 280px 1fr 280px;
+  display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 0 var(--space-6);
+  padding: 0 var(--space-5);
   background: var(--bg-player);
   border-top: 1px solid var(--border-subtle);
   height: var(--player-height);
@@ -286,6 +285,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-shrink: 0;
+  width: 220px;
   min-width: 0;
 }
 
@@ -366,18 +367,11 @@
   margin-top: 2px;
 }
 
-.player-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 12px 0;
-}
-
 .player-buttons {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .player-btn {
@@ -389,6 +383,7 @@
   border-radius: 50%;
   color: var(--text-muted);
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .player-btn:hover {
@@ -397,9 +392,14 @@
   transform: scale(1.12);
 }
 
+.player-btn-sm {
+  width: 28px;
+  height: 28px;
+}
+
 .player-btn-primary {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   background: linear-gradient(135deg, var(--ctp-mauve), var(--ctp-lavender));
   color: var(--ctp-crust);
   border-radius: 50%;
@@ -410,16 +410,22 @@
 .player-btn-primary:hover {
   background: linear-gradient(135deg, var(--ctp-lavender), var(--ctp-mauve));
   color: var(--ctp-crust);
-  transform: scale(1.07);
+  transform: scale(1.06);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
 }
 
-.player-progress {
+/* Waveform seekbar section */
+.player-waveform-section {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  max-width: 480px;
+  gap: var(--space-2);
+}
+
+.player-waveform-wrap {
+  flex: 1;
+  min-width: 0;
 }
 
 .player-time {
@@ -427,62 +433,23 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.player-progress-bar {
-  flex: 1;
-  position: relative;
-}
-
-.player-progress-bar input[type="range"] {
-  width: 100%;
-}
-
-.player-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-3);
-}
-
-.volume-control {
+/* Volume section */
+.player-volume-section {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  min-width: 120px;
+  flex-shrink: 0;
+  width: 155px;
 }
 
-.volume-control svg { flex-shrink: 0; color: var(--text-muted); }
-
-.volume-control input[type="range"] { flex: 1; }
-
-/* Connection Toggle */
-.conn-toggle {
-  display: flex;
-  align-items: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  overflow: hidden;
-  user-select: none;
+.player-volume-slider {
+  flex: 1;
+  min-width: 0;
 }
 
-.conn-toggle-btn {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-  color: var(--text-muted);
-  cursor: pointer;
-  letter-spacing: 0.03em;
-}
-
-.conn-toggle-btn.active {
-  background: var(--accent);
-  color: var(--ctp-crust);
-}
 
 /* ─── Queue Panel ─── */
 .queue-panel {

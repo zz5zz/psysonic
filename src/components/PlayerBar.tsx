@@ -1,10 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 import {
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Music, List, Square, Repeat, Repeat1, Maximize2
+  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Music,
+  Square, Repeat, Repeat1, Maximize2
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { buildCoverArtUrl, coverArtCacheKey } from '../api/subsonic';
 import CachedImage from './CachedImage';
+import WaveformSeek from './WaveformSeek';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,25 +20,19 @@ function formatTime(seconds: number): string {
 export default function PlayerBar() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentTrack, isPlaying, progress, buffered, currentTime, volume, togglePlay, next, previous, seek, setVolume, isQueueVisible, toggleQueue, stop, toggleRepeat, repeatMode, toggleFullscreen } = usePlayerStore();
+  const {
+    currentTrack, isPlaying, currentTime, volume,
+    togglePlay, next, previous, setVolume,
+    stop, toggleRepeat, repeatMode, toggleFullscreen,
+  } = usePlayerStore();
 
   const duration = currentTrack?.duration ?? 0;
   const coverSrc = useMemo(() => currentTrack?.coverArt ? buildCoverArtUrl(currentTrack.coverArt, 128) : '', [currentTrack?.coverArt]);
   const coverKey = currentTrack?.coverArt ? coverArtCacheKey(currentTrack.coverArt, 128) : '';
 
-  const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    seek(parseFloat(e.target.value));
-  }, [seek]);
-
   const handleVolume = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(parseFloat(e.target.value));
   }, [setVolume]);
-
-  const pct = progress * 100;
-  const buf = Math.max(pct, buffered * 100);
-  const progressStyle = {
-    background: `linear-gradient(to right, var(--ctp-mauve) ${pct}%, var(--ctp-overlay0) ${pct}%, var(--ctp-overlay0) ${buf}%, var(--ctp-surface2) ${buf}%)`,
-  };
 
   const volumeStyle = {
     background: `linear-gradient(to right, var(--ctp-mauve) ${volume * 100}%, var(--ctp-surface2) ${volume * 100}%)`,
@@ -44,6 +40,7 @@ export default function PlayerBar() {
 
   return (
     <footer className="player-bar" role="region" aria-label={t('player.regionLabel')}>
+
       {/* Track Info */}
       <div className="player-track-info">
         <div
@@ -89,88 +86,69 @@ export default function PlayerBar() {
         </div>
       </div>
 
-      {/* Controls + Progress */}
-      <div className="player-controls">
-        <div className="player-buttons">
-          <button className="player-btn" onClick={stop} aria-label={t('player.stop')} data-tooltip={t('player.stop')}>
-            <Square size={16} fill="currentColor" />
-          </button>
-          
-          <button className="player-btn" onClick={previous} aria-label={t('player.prev')} data-tooltip={t('player.prev')}>
-            <SkipBack size={20} />
-          </button>
-
-          <button
-            className="player-btn player-btn-primary"
-            onClick={togglePlay}
-            aria-label={isPlaying ? t('player.pause') : t('player.play')}
-            data-tooltip={isPlaying ? t('player.pause') : t('player.play')}
-          >
-            {isPlaying ? <Pause size={22} /> : <Play size={22} fill="currentColor" />}
-          </button>
-
-          <button className="player-btn" onClick={next} aria-label={t('player.next')} data-tooltip={t('player.next')}>
-            <SkipForward size={20} />
-          </button>
-
-          <button 
-            className="player-btn" 
-            onClick={toggleRepeat} 
-            aria-label={t('player.repeat')} 
-            data-tooltip={`${t('player.repeat')}: ${repeatMode === 'off' ? t('player.repeatOff') : repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOne')}`}
-            style={{ color: repeatMode !== 'off' ? 'var(--accent)' : 'inherit' }}
-          >
-            {repeatMode === 'one' ? <Repeat1 size={18} /> : <Repeat size={18} />}
-          </button>
-        </div>
-
-        <div className="player-progress">
-          <span className="player-time">{formatTime(currentTime)}</span>
-          <div className="player-progress-bar">
-            <input
-              type="range"
-              id="player-seek"
-              min={0}
-              max={1}
-              step={0.001}
-              value={progress}
-              onChange={handleSeek}
-              style={progressStyle}
-              aria-label={t('player.progress')}
-            />
-          </div>
-          <span className="player-time">{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      {/* Volume + Connection */}
-      <div className="player-right">
-        <div className="volume-control" aria-label={t('player.volume')}>
-          {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          <input
-            type="range"
-            id="player-volume"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            onChange={handleVolume}
-            style={volumeStyle}
-            aria-label={t('player.volume')}
-          />
-        </div>
-
-
-        <button 
-          className="player-btn" 
-          onClick={toggleQueue} 
-          aria-label={t('player.toggleQueue')} 
-          data-tooltip={t('player.toggleQueue')}
-          style={{ marginLeft: 'var(--space-3)', color: isQueueVisible ? 'var(--accent)' : 'var(--text-secondary)' }}
+      {/* Transport Controls */}
+      <div className="player-buttons">
+        <button className="player-btn player-btn-sm" onClick={stop} aria-label={t('player.stop')} data-tooltip={t('player.stop')}>
+          <Square size={14} fill="currentColor" />
+        </button>
+        <button className="player-btn" onClick={previous} aria-label={t('player.prev')} data-tooltip={t('player.prev')}>
+          <SkipBack size={19} />
+        </button>
+        <button
+          className="player-btn player-btn-primary"
+          onClick={togglePlay}
+          aria-label={isPlaying ? t('player.pause') : t('player.play')}
+          data-tooltip={isPlaying ? t('player.pause') : t('player.play')}
         >
-          <List size={18} />
+          {isPlaying ? <Pause size={22} /> : <Play size={22} fill="currentColor" />}
+        </button>
+        <button className="player-btn" onClick={next} aria-label={t('player.next')} data-tooltip={t('player.next')}>
+          <SkipForward size={19} />
+        </button>
+        <button
+          className="player-btn player-btn-sm"
+          onClick={toggleRepeat}
+          aria-label={t('player.repeat')}
+          data-tooltip={`${t('player.repeat')}: ${repeatMode === 'off' ? t('player.repeatOff') : repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOne')}`}
+          style={{ color: repeatMode !== 'off' ? 'var(--accent)' : undefined }}
+        >
+          {repeatMode === 'one' ? <Repeat1 size={14} /> : <Repeat size={14} />}
         </button>
       </div>
+
+      {/* Waveform Seekbar */}
+      <div className="player-waveform-section">
+        <span className="player-time">{formatTime(currentTime)}</span>
+        <div className="player-waveform-wrap">
+          <WaveformSeek trackId={currentTrack?.id} />
+        </div>
+        <span className="player-time">{formatTime(duration)}</span>
+      </div>
+
+      {/* Volume */}
+      <div className="player-volume-section">
+        <button
+          className="player-btn player-btn-sm"
+          onClick={() => setVolume(volume === 0 ? 0.7 : 0)}
+          aria-label={t('player.volume')}
+          style={{ color: 'var(--text-muted)', flexShrink: 0 }}
+        >
+          {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+        </button>
+        <input
+          type="range"
+          id="player-volume"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={handleVolume}
+          style={volumeStyle}
+          aria-label={t('player.volume')}
+          className="player-volume-slider"
+        />
+      </div>
+
     </footer>
   );
 }

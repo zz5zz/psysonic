@@ -110,6 +110,10 @@ function LoadPlaylistModal({ onClose, onLoad }: { onClose: () => void, onLoad: (
   );
 }
 
+// Module-level fallback for fromIdx — survives the dragend-before-drop race on
+// macOS WKWebView AND the dataTransfer.getData('') bug on Windows WebView2.
+let _dragFromIdx: number | null = null;
+
 export default function QueuePanel() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -154,10 +158,9 @@ export default function QueuePanel() {
   const onDragStart = (e: React.DragEvent, index: number) => {
     isDraggingInternalRef.current = true;
     draggedIdxRef.current = index;
+    _dragFromIdx = index;
     setDraggedIdx(index);
     e.dataTransfer.effectAllowed = 'move';
-    // Store index in dataTransfer too — on macOS WKWebView dragend fires before
-    // drop, so the ref will already be null; dataTransfer survives that race.
     e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'queue_reorder', index }));
   };
 
@@ -179,6 +182,9 @@ export default function QueuePanel() {
     isDraggingInternalRef.current = false;
     draggedIdxRef.current = null;
     dragOverIdxRef.current = null;
+    // _dragFromIdx intentionally NOT cleared here — drop fires after dragend on
+    // macOS WKWebView, so we need the value to survive into onDropQueue.
+    // It is cleared in onDropQueue after use instead.
   };
 
   const onDropQueue = async (e: React.DragEvent) => {
@@ -197,9 +203,11 @@ export default function QueuePanel() {
       if (raw) parsedData = JSON.parse(raw);
     } catch { /* ignore */ }
 
-    if (parsedData?.type === 'queue_reorder') {
-      // fromIdx: always reliable from dataTransfer (set during dragstart)
-      const fromIdx: number = parsedData.index;
+    if (parsedData?.type === 'queue_reorder' || _dragFromIdx !== null) {
+      // fromIdx: prefer dataTransfer value; fall back to module-level var for
+      // Windows WebView2 where getData() can return '' in the drop handler.
+      const fromIdx: number = parsedData?.index ?? _dragFromIdx!;
+      _dragFromIdx = null;
 
       // toIdx: calculate from drop coordinates — avoids all ref timing issues.
       // Works even when dragend fires before drop (macOS WKWebView / Windows WebView2).
@@ -220,6 +228,7 @@ export default function QueuePanel() {
     }
 
     // External drop (song / album dragged from elsewhere in the app)
+    _dragFromIdx = null;
     if (!parsedData) return;
     if (parsedData.type === 'song') {
       enqueue([parsedData.track]);

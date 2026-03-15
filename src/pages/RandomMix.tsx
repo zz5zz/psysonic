@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getRandomSongs, getGenres, SubsonicSong, SubsonicGenre, star, unstar } from '../api/subsonic';
 import { usePlayerStore } from '../store/playerStore';
 import { useAuthStore } from '../store/authStore';
-import { Play, Star, RefreshCw, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Play, Star, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const AUDIOBOOK_GENRES = [
@@ -42,7 +42,6 @@ export default function RandomMix() {
   const [songs, setSongs] = useState<SubsonicSong[]>([]);
   const [loading, setLoading] = useState(true);
   const playTrack = usePlayerStore(s => s.playTrack);
-  const enqueue = usePlayerStore(s => s.enqueue);
   const [starredSongs, setStarredSongs] = useState<Set<string>>(new Set());
   const { excludeAudiobooks, setExcludeAudiobooks, customGenreBlacklist, setCustomGenreBlacklist } = useAuthStore();
   const [addedGenre, setAddedGenre] = useState<string | null>(null);
@@ -56,7 +55,6 @@ export default function RandomMix() {
   const [selectedSuperGenre, setSelectedSuperGenre] = useState<string | null>(null);
   const [genreMixSongs, setGenreMixSongs] = useState<SubsonicSong[]>([]);
   const [genreMixLoading, setGenreMixLoading] = useState(false);
-  const [genreMixMatchedGenres, setGenreMixMatchedGenres] = useState<string[]>([]);
 
   const fetchSongs = () => {
     setLoading(true);
@@ -124,7 +122,6 @@ export default function RandomMix() {
     const matched = serverGenres
       .filter(sg2 => sg.keywords.some(kw => sg2.value.toLowerCase().includes(kw)))
       .map(sg2 => sg2.value);
-    setGenreMixMatchedGenres(matched);
     setGenreMixLoading(true);
     setGenreMixSongs([]);
 
@@ -154,27 +151,6 @@ export default function RandomMix() {
     setGenreMixLoading(false);
   };
 
-  const loadMoreGenreMix = async () => {
-    if (!genreMixMatchedGenres.length) return;
-    setGenreMixLoading(true);
-    try {
-      const perGenre = Math.max(1, Math.ceil(10 / genreMixMatchedGenres.length));
-      const settled = await Promise.allSettled(genreMixMatchedGenres.map(g => getRandomSongs(perGenre, g, 45000)));
-      const combined = settled.flatMap(r => r.status === 'fulfilled' ? r.value : []);
-      for (let i = combined.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [combined[i], combined[j]] = [combined[j], combined[i]];
-      }
-      enqueue(combined.slice(0, 10).map(s => ({
-        id: s.id, title: s.title, artist: s.artist, album: s.album,
-        albumId: s.albumId, artistId: s.artistId, duration: s.duration,
-        coverArt: s.coverArt, track: s.track, year: s.year,
-        bitRate: s.bitRate, suffix: s.suffix, userRating: s.userRating,
-      })));
-    } finally {
-      setGenreMixLoading(false);
-    }
-  };
 
   return (
     <div className="content-body animate-fade-in">
@@ -320,9 +296,6 @@ export default function RandomMix() {
               {genreMixLoading && <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />}
             </span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }} onClick={loadMoreGenreMix} disabled={genreMixLoading}>
-                <Plus size={14} /> {t('randomMix.genreMixLoadMore')}
-              </button>
               <button className="btn btn-primary" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => genreMixSongs.length > 0 && playTrack(genreMixSongs[0], genreMixSongs)} disabled={genreMixLoading || genreMixSongs.length === 0}>
                 <Play size={14} fill="currentColor" /> {t('randomMix.playAll')}
               </button>

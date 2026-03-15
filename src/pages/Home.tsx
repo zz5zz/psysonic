@@ -8,6 +8,7 @@ export default function Home() {
   const [starred, setStarred] = useState<SubsonicAlbum[]>([]);
   const [recent, setRecent] = useState<SubsonicAlbum[]>([]);
   const [random, setRandom] = useState<SubsonicAlbum[]>([]);
+  const [heroAlbums, setHeroAlbums] = useState<SubsonicAlbum[]>([]);
   const [mostPlayed, setMostPlayed] = useState<SubsonicAlbum[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,12 +16,13 @@ export default function Home() {
     Promise.all([
       getAlbumList('starred', 12).catch(() => []),
       getAlbumList('newest', 12).catch(() => []),
-      getAlbumList('random', 12).catch(() => []),
+      getAlbumList('random', 20).catch(() => []),   // fetch 20 — split between Hero and Discover
       getAlbumList('frequent', 12).catch(() => []),
     ]).then(([s, n, r, f]) => {
       setStarred(s);
       setRecent(n);
-      setRandom(r);
+      setHeroAlbums(r.slice(0, 8));
+      setRandom(r.slice(8));
       setMostPlayed(f);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -47,7 +49,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      <Hero />
+      <Hero albums={heroAlbums} />
 
       <div className="content-body" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         {loading ? (

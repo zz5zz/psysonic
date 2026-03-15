@@ -662,6 +662,8 @@ select.input.input:focus {
   display: flex;
   gap: 2px;
   color: var(--ctp-overlay1);
+  justify-content: center;
+  width: 100%;
 }
 .star-rating .star.filled { color: var(--ctp-yellow); }
 .star-rating .star:hover { color: var(--ctp-yellow); cursor: pointer; }

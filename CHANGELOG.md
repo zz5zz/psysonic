@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-15
+
+### Added
+
+#### Player Bar — Complete Redesign
+- **Waveform seekbar**: Replaces the classic thin slider. A canvas-based waveform with 500 deterministic bars (seeded by `trackId`) fills the full available width. Played portion renders as a blue → mauve gradient with a soft glow; buffered range is slightly brighter; unplayed bars are dimmed to 28% opacity. Click or drag anywhere to seek.
+- **New layout**: Single flex row — `[Cover + Track Info] [Transport Controls] [Waveform + Times] [Volume]`. More breathing room for the waveform; controls feel lighter and better proportioned.
+- **Queue toggle relocated**: Moved from the bottom player bar to the top-right of the content header — consistent with the sidebar collapse button pattern. Uses `PanelRightClose` / `PanelRight` icons (same family as `PanelLeftClose` / `PanelLeft` in the sidebar).
+
+#### Ambient Stage — MilkDrop Visualizer
+- **Butterchurn integration**: Clicking the waveform icon (top-right of the fullscreen player) activates the MilkDrop visualizer powered by [butterchurn](https://github.com/jberg/butterchurn) + `butterchurn-presets`.
+- A hidden `<audio>` element is routed through the Web Audio API `AnalyserNode` (not connected to `AudioDestinationNode` — completely silent). The Rust/rodio engine continues to handle actual audio output.
+- Starts with a random preset; the shuffle button cycles through all available presets with a 2-second blend transition. Current preset name is shown in the top bar.
+- When the visualizer is active, the blurred background, orbs, and overlay are replaced by the canvas.
+
+#### Tracklist — Animated Equalizer Indicator
+- The currently **playing** track shows three animated equalizer bars (CSS `scaleY` keyframe animation, staggered timing) instead of a static play icon.
+- When **paused**, the static play icon is shown.
+- Hovering any other track still shows a play icon.
+- Track row alignment fixed: `align-items: center` on the grid row + `.track-num` as flex center — icons and track numbers are now perfectly vertically aligned with the song title.
+
+#### Artist Pages — In-App Browser
+- Last.fm and Wikipedia buttons now open a native **Tauri `WebviewWindow`** (1100 × 780, centered) instead of the system browser. Both sites load fully within the app and can be closed independently.
+- Required new capabilities: `core:window:allow-create`, `core:webview:allow-create-webview-window`.
+
+#### Update Checker
+- Update check now runs **every 10 minutes** during runtime in addition to the initial check 1.5 s after launch.
+- Version label in the update toast no longer includes a `v` prefix (shows `1.3.0` instead of `v1.3.0`).
+
+#### Help Page
+- New **Random Mix** section: explains the random mix, keyword filter, and super genre mix.
+- Updated **Playback** section: waveform seekbar, MilkDrop visualizer, queue shuffle.
+- Updated **Library** section: in-app browser for artist links.
+- Updated queue entry to reflect the new toggle location.
+- **Accordion styling**: open question and answer share a continuous 3 px accent stripe on the left; answer background uses `--bg-app` for clear contrast against the question's `--bg-card`.
+
+### Fixed
+- **Version in Settings** was hardcoded to `1.0.12`. Now imported from `package.json` at build time — same source as the sidebar update checker.
+- **Hero / Discover duplicate albums**: Both sections previously fetched `random` independently, often showing the same albums. Now a single request fetches 20; `slice(0, 8)` goes to the Hero carousel and `slice(8)` to the Discover row.
+- **Active track pulse too aggressive**: Changed from a `background: transparent` flash to a gentle `opacity: 0.6` fade over 3 s — significantly less distracting.
+
+### Changed
+- **Blacklist → Keyword Filter**: Renamed throughout UI and i18n (EN + DE) to better reflect that the filter matches genre, title, and album fields — not just genre tags.
+
 ## [1.2.0] - 2026-03-15
 
 ### Added

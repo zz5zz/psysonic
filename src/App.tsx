@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { PanelRight, PanelRightClose } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Sidebar from './components/Sidebar';
 import PlayerBar from './components/PlayerBar';
 import LiveSearch from './components/LiveSearch';
@@ -37,9 +39,11 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function AppShell() {
+  const { t } = useTranslation();
   const isFullscreenOpen = usePlayerStore(s => s.isFullscreenOpen);
   const toggleFullscreen = usePlayerStore(s => s.toggleFullscreen);
   const isQueueVisible = usePlayerStore(s => s.isQueueVisible);
+  const toggleQueue = usePlayerStore(s => s.toggleQueue);
   const initializeFromServerQueue = usePlayerStore(s => s.initializeFromServerQueue);
   const currentTrack = usePlayerStore(s => s.currentTrack);
   const isPlaying = usePlayerStore(s => s.isPlaying);
@@ -124,6 +128,13 @@ function AppShell() {
           <LiveSearch />
           <div className="spacer" />
           <NowPlayingDropdown />
+          <button
+            className="collapse-btn"
+            onClick={toggleQueue}
+            title={t('player.toggleQueue')}
+          >
+            {isQueueVisible ? <PanelRightClose size={24} /> : <PanelRight size={24} />}
+          </button>
         </header>
         <div className="content-body" style={{ padding: 0 }}>
           <Routes>

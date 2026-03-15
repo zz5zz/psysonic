@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { version as appVersion } from '../../package.json';
 import { useNavigate } from 'react-router-dom';
 import {
   Wifi, WifiOff, Globe, Music2, Sliders, LogOut, CheckCircle2, FolderOpen, Palette, Server, Plus, Trash2, Eye, EyeOff, Info, ExternalLink, Shuffle
@@ -465,7 +466,7 @@ export default function Settings() {
                 Psysonic
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {t('settings.aboutVersion')} 1.0.12
+                {t('settings.aboutVersion')} {appVersion}
               </div>
             </div>
           </div>

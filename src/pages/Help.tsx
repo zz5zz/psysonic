@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Rocket, Play, LibraryBig, Settings2, Radio, Wrench } from 'lucide-react';
+import { ChevronDown, Rocket, Play, LibraryBig, Settings2, Radio, Wrench, Shuffle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface FaqItem { q: string; a: string; }
@@ -42,6 +42,9 @@ export default function Help() {
         { q: t('help.q6'), a: t('help.a6') },
         { q: t('help.q7'), a: t('help.a7') },
         { q: t('help.q8'), a: t('help.a8') },
+        { q: t('help.q22'), a: t('help.a22') },
+        { q: t('help.q23'), a: t('help.a23') },
+        { q: t('help.q24'), a: t('help.a24') },
       ],
     },
     {
@@ -51,6 +54,7 @@ export default function Help() {
         { q: t('help.q9'),  a: t('help.a9') },
         { q: t('help.q10'), a: t('help.a10') },
         { q: t('help.q11'), a: t('help.a11') },
+        { q: t('help.q25'), a: t('help.a25') },
       ],
     },
     {
@@ -69,6 +73,15 @@ export default function Help() {
       items: [
         { q: t('help.q16'), a: t('help.a16') },
         { q: t('help.q17'), a: t('help.a17') },
+      ],
+    },
+    {
+      icon: <Shuffle size={18} />,
+      title: t('help.s7'),
+      items: [
+        { q: t('help.q26'), a: t('help.a26') },
+        { q: t('help.q27'), a: t('help.a27') },
+        { q: t('help.q28'), a: t('help.a28') },
       ],
     },
     {

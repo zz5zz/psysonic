@@ -42,7 +42,11 @@ function HeroBg({ url }: { url: string }) {
   );
 }
 
-export default function Hero() {
+interface HeroProps {
+  albums?: SubsonicAlbum[];
+}
+
+export default function Hero({ albums: albumsProp }: HeroProps = {}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([]);
@@ -50,8 +54,9 @@ export default function Hero() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    if (albumsProp?.length) { setAlbums(albumsProp); return; }
     getRandomAlbums(8).then(a => { if (a.length) setAlbums(a); }).catch(() => {});
-  }, []);
+  }, [albumsProp]);
 
   // Start / restart auto-advance timer
   const startTimer = useCallback((len: number) => {
