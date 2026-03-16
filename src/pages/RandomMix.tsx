@@ -58,9 +58,11 @@ export default function RandomMix() {
   const [selectedSuperGenre, setSelectedSuperGenre] = useState<string | null>(null);
   const [genreMixSongs, setGenreMixSongs] = useState<SubsonicSong[]>([]);
   const [genreMixLoading, setGenreMixLoading] = useState(false);
+  const [genreMixComplete, setGenreMixComplete] = useState(false);
 
   const fetchSongs = () => {
     setLoading(true);
+    setSongs([]);
     getRandomSongs(50)
       .then(fetched => {
         setSongs(fetched);
@@ -96,7 +98,11 @@ export default function RandomMix() {
   });
 
   const handlePlayAll = () => {
-    if (filteredSongs.length > 0) playTrack(filteredSongs[0], filteredSongs);
+    if (selectedSuperGenre && genreMixSongs.length > 0) {
+      playTrack(genreMixSongs[0], genreMixSongs);
+    } else if (filteredSongs.length > 0) {
+      playTrack(filteredSongs[0], filteredSongs);
+    }
   };
 
   const toggleSongStar = async (song: SubsonicSong, e: React.MouseEvent) => {
@@ -126,10 +132,13 @@ export default function RandomMix() {
   const loadGenreMix = async (superGenreId: string) => {
     const sg = SUPER_GENRES.find(s => s.id === superGenreId);
     if (!sg) return;
-    const matched = serverGenres
+    const allMatched = serverGenres
       .filter(sg2 => sg.keywords.some(kw => sg2.value.toLowerCase().includes(kw)))
-      .map(sg2 => sg2.value);
+      .map(sg2 => sg2.value)
+      .sort(() => Math.random() - 0.5);
+    const matched = allMatched.slice(0, 50);
     setGenreMixLoading(true);
+    setGenreMixComplete(false);
     setGenreMixSongs([]);
 
     const perGenre = Math.max(1, Math.ceil(50 / matched.length));
@@ -156,6 +165,7 @@ export default function RandomMix() {
       return s.slice(0, 50);
     });
     setGenreMixLoading(false);
+    setGenreMixComplete(true);
   };
 
 
@@ -168,9 +178,23 @@ export default function RandomMix() {
           <button className="btn btn-surface" onClick={fetchSongs} disabled={loading} data-tooltip={t('randomMix.remixTooltip')}>
             <RefreshCw size={18} className={loading ? 'spin' : ''} /> {t('randomMix.remix')}
           </button>
-          <button className="btn btn-primary" onClick={handlePlayAll} disabled={loading || filteredSongs.length === 0}>
-            <Play size={18} fill="currentColor" /> {t('randomMix.playAll')}
-          </button>
+          {(() => {
+            const isGenreLoading = selectedSuperGenre && !genreMixComplete;
+            const isDisabled = loading || (selectedSuperGenre ? !genreMixComplete || genreMixSongs.length === 0 : filteredSongs.length === 0);
+            return (
+              <button
+                className={`btn ${isGenreLoading ? 'btn-surface' : 'btn-primary'}`}
+                onClick={handlePlayAll}
+                disabled={isDisabled}
+              >
+                {isGenreLoading ? (
+                  <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> {Math.min(genreMixSongs.length, 50)} / 50</>
+                ) : (
+                  <><Play size={18} fill="currentColor" /> {t('randomMix.playAll')}</>
+                )}
+              </button>
+            );
+          })()}
         </div>
       </div>
 
@@ -302,11 +326,6 @@ export default function RandomMix() {
               {SUPER_GENRES.find(s => s.id === selectedSuperGenre)?.label} Mix
               {genreMixLoading && <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />}
             </span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn btn-primary" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => genreMixSongs.length > 0 && playTrack(genreMixSongs[0], genreMixSongs)} disabled={genreMixLoading || genreMixSongs.length === 0}>
-                <Play size={14} fill="currentColor" /> {t('randomMix.playAll')}
-              </button>
-            </div>
           </div>
           {genreMixLoading && genreMixSongs.length === 0 ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}><div className="spinner" /></div>

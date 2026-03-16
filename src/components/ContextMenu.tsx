@@ -215,6 +215,9 @@ export default function ContextMenu() {
                   <Disc3 size={14} /> {t('contextMenu.openAlbum')}
                 </div>
               )}
+              <div className="context-menu-item" onClick={() => handleAction(() => star(song.id, 'song'))}>
+                <Star size={14} /> {t('contextMenu.favorite')}
+              </div>
               <div className="context-menu-item" onClick={() => handleAction(() => startRadio(song.artist, song.artist))}>
                 <Radio size={14} /> {t('contextMenu.startRadio')}
               </div>

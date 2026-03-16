@@ -570,7 +570,7 @@
 /* Prevent child elements from stealing dragenter/dragleave events */
 .queue-item > * { pointer-events: none; }
 
-.queue-item:hover {
+.queue-item:hover, .queue-item.context-active {
   background: var(--bg-hover);
   color: var(--text-primary);
 }

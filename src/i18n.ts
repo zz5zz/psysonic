@@ -373,7 +373,9 @@ const enTranslation = {
     hide: 'Hide',
     close: 'Close',
     nextTracks: 'Next Tracks',
-    emptyQueue: 'The queue is empty.'
+    emptyQueue: 'The queue is empty.',
+    trackSingular: 'track',
+    trackPlural: 'tracks',
   },
   statistics: {
     title: 'Statistics',
@@ -790,7 +792,9 @@ const deTranslation = {
     hide: 'Verbergen',
     close: 'Schließen',
     nextTracks: 'Nächste Titel',
-    emptyQueue: 'Die Warteschlange ist leer.'
+    emptyQueue: 'Die Warteschlange ist leer.',
+    trackSingular: 'Titel',
+    trackPlural: 'Titel',
   },
   statistics: {
     title: 'Statistiken',

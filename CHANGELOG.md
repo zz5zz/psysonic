@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2026-03-16
+
+### Fixed
+
+#### Random Mix — Genre Mix
+- **Second "Play All" button removed**: The genre mix section had a redundant play button below the super-genre selector. The top-right button is now context-aware — it plays the genre mix when one is active, otherwise the regular mix.
+- **"Play All" disabled during genre mix loading**: The button now stays grayed out with a live progress counter (`n / 50`) until all songs are fully loaded. Clicking while the list was still building sent only the songs loaded so far.
+- **Over-fetching fixed**: Genre mix previously fetched up to 100+ songs and sliced to 50 at the end. Now the matched genre list is capped at 50 (randomly sampled when more match) so the total fetch stays close to 50 with no wasted server I/O.
+- **Regular mix cache-busting**: `getRandomSongs` requests now include a timestamp parameter, preventing browser/axios from returning a cached response and showing the same list on every remix.
+- **Display/state mismatch on remix**: Clicking "Mischen" now clears the current list immediately, ensuring the spinner is shown and the displayed songs always match what "Play All" would send.
+
+#### Queue Panel
+- **Hover highlight lost on right-click**: Queue items now retain their hover highlight while a context menu is open for them (`.context-active` CSS class).
+- **Song count and total duration**: The queue header now shows the number of tracks and total runtime below the title (e.g. `12 tracks · 47:32`).
+
+#### Context Menu
+- **"Favorite" option added for queue items**: Right-clicking a queue item now includes a "Favorite" option, consistent with the song context menu.
+
 ## [1.4.2] - 2026-03-16
 
 ### Fixed

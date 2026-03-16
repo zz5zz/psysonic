@@ -128,6 +128,7 @@ export default function QueuePanel() {
   const reorderQueue = usePlayerStore(s => s.reorderQueue);
   const shuffleQueue = usePlayerStore(s => s.shuffleQueue);
   const enqueue = usePlayerStore(s => s.enqueue);
+  const contextMenu = usePlayerStore(s => s.contextMenu);
 
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -254,7 +255,23 @@ export default function QueuePanel() {
       }}
     >
       <div className="queue-header">
-        <h2 style={{ fontSize: '14px', fontWeight: 600, margin: 0 }}>{t('queue.title')}</h2>
+        <div>
+          <h2 style={{ fontSize: '14px', fontWeight: 600, margin: 0 }}>{t('queue.title')}</h2>
+          {queue.length > 0 && (() => {
+            const totalSecs = queue.reduce((acc, t) => acc + (t.duration || 0), 0);
+            const h = Math.floor(totalSecs / 3600);
+            const m = Math.floor((totalSecs % 3600) / 60);
+            const s = totalSecs % 60;
+            const dur = h > 0
+              ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+              : `${m}:${s.toString().padStart(2, '0')}`;
+            return (
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                {queue.length} {queue.length === 1 ? t('queue.trackSingular') : t('queue.trackPlural')} · {dur}
+              </div>
+            );
+          })()}
+        </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button onClick={() => shuffleQueue()} style={{ color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }} aria-label={t('queue.shuffle')} data-tooltip={t('queue.shuffle')} disabled={queue.length < 2}>
@@ -343,7 +360,7 @@ export default function QueuePanel() {
               <div
                 key={`${track.id}-${idx}`}
                 data-queue-idx={idx}
-                className={`queue-item ${isPlaying ? 'active' : ''}`}
+                className={`queue-item ${isPlaying ? 'active' : ''} ${contextMenu.isOpen && contextMenu.type === 'queue-item' && contextMenu.queueIndex === idx ? 'context-active' : ''}`}
                 onClick={() => playTrack(track, queue)}
                 onContextMenu={(e) => {
                   e.preventDefault();

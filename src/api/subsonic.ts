@@ -163,7 +163,7 @@ export async function getAlbumList(
 }
 
 export async function getRandomSongs(size = 50, genre?: string, timeout = 15000): Promise<SubsonicSong[]> {
-  const params: Record<string, string | number> = { size };
+  const params: Record<string, string | number> = { size, _t: Date.now() };
   if (genre) params.genre = genre;
   const data = await api<{ randomSongs: { song: SubsonicSong[] } }>('getRandomSongs.view', params, timeout);
   return data.randomSongs?.song ?? [];
