@@ -345,7 +345,7 @@ export default function Settings() {
                       <div style={{ fontWeight: 600, fontSize: 14 }}>@{auth.lastfmUsername}</div>
                       {lfmUserInfo && (
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, display: 'flex', gap: '0.75rem' }}>
-                          <span>{t('settings.lfmScrobbles', { count: lfmUserInfo.playcount.toLocaleString() })}</span>
+                          <span>{t('settings.lfmScrobbles', { n: lfmUserInfo.playcount.toLocaleString() })}</span>
                           <span>{t('settings.lfmMemberSince', { year: new Date(lfmUserInfo.registeredAt * 1000).getFullYear() })}</span>
                         </div>
                       )}

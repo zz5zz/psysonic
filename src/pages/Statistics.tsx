@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { lastfmIsConfigured, lastfmGetTopArtists, lastfmGetTopAlbums, lastfmGetTopTracks, lastfmGetRecentTracks, LastfmPeriod, LastfmTopArtist, LastfmTopAlbum, LastfmTopTrack, LastfmRecentTrack } from '../api/lastfm';
 
-function relativeTime(timestamp: number, t: (key: string, opts?: object) => string): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function relativeTime(timestamp: number, t: (key: string, opts?: any) => string): string {
   const diff = Math.floor(Date.now() / 1000) - timestamp;
   if (diff < 60) return t('statistics.lfmJustNow');
   if (diff < 3600) return t('statistics.lfmMinutesAgo', { n: Math.floor(diff / 60) });
