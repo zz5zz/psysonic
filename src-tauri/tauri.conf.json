@@ -29,12 +29,6 @@
     ],
     "security": {
       "csp": null
-    },
-    "trayIcon": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": false,
-      "title": "Psysonic",
-      "tooltip": "Psysonic"
     }
   },
   "bundle": {
