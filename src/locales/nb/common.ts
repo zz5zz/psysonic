@@ -61,6 +61,6 @@ export const common = {
   availableSources_other: 'Tilgjengelig fra {{count}} kilder',
   chooseSource: 'Velg en kilde',
   currentSource: 'Gjeldende kilde',
-  openFromServer: 'Åpne fra serveren',
+  openFromServer: 'Åpne fra tjeneren',
   libraryEmpty: 'Biblioteket ditt er tomt.',
 };

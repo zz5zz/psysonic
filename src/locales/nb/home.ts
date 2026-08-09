@@ -3,7 +3,7 @@ export const home = {
   starred: 'Personlige favoritter',
   mostPlayed: 'Mest spilt',
   recentlyPlayed: 'Nylig spilt',
-  losslessAlbums: 'Lossless-album',
+  losslessAlbums: 'Tapsfri-album',
   discover: 'Oppdag',
   discoverSongs: 'Oppdag spor',
   loadMore: 'Last inn flere',
@@ -19,7 +19,7 @@ export const home = {
   mainstageEmptyBody: 'Alle seksjoner er slått av. Slå på seksjoner igjen, eller skjul Hovedscene fra sidefeltet.',
   mainstageEmptyCta: 'Åpne Tilpasning',
   diagnostics: {
-    copyAll: 'Copy Mainstage diagnostics',
+    copyAll: 'Kopier Hovedscene diagnostikk',
     enableSection: 'Aktiver {{section}}',
     generationInfo: 'Genereringsinformasjon',
     duration: 'Varighet',

@@ -5,5 +5,5 @@ export const randomLanding = {
   mixByAlbums: 'Miks etter album',
   mixByAlbumsDesc: 'Tilfeldige album for nye oppdagelser',
   mixByLucky: 'Lykkemiks',
-  mixByLuckyDesc: 'Smart Instant Mix fra toppartister, album og gode vurderinger',
+  mixByLuckyDesc: 'Smart Instant Miks fra toppartister, album og gode vurderinger',
 };

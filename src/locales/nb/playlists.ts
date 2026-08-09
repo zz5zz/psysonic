@@ -121,6 +121,6 @@ export const playlists = {
     count_one: '{{count}} spilleliste',
     count_other: '{{count}} spillelister',
     localOnlyNotice:
-      'Mapper lagres bare i Psysonic på denne enheten. Navidrome og Subsonic-API-et støtter ikke spillelistemapper, så strukturen lagres ikke på serveren din og synkroniseres ikke med dine andre enheter og apper.',
+      'Mapper lagres bare i Psysonic på denne enheten. Navidrome og Subsonic-API-et støtter ikke spillelistemapper, så strukturen lagres ikke på tjeneren din og synkroniseres ikke med dine andre enheter og apper.',
   },
 };

@@ -36,7 +36,7 @@ export const deviceSync = {
   noTargetDir: 'Velg en målmappe først.',
   noSources: 'Velg minst én kilde.',
   noTracks: 'Ingen spor funnet i de valgte kildene.',
-  fetchError: 'Kunne ikke hente spor fra serveren.',
+  fetchError: 'Kunne ikke hente spor fra tjeneren.',
   syncComplete: 'Synkronisering fullført.',
   dismiss: 'Lukk',
   cancelSync: 'Avbryt',

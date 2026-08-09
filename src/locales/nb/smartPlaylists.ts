@@ -30,7 +30,7 @@ export const smartPlaylists = {
   updated: '{{name}} oppdatert',
   createFailed: 'Kunne ikke opprette smart-spilleliste.',
   updateFailed: 'Kunne ikke oppdatere smart-spilleliste.',
-  navidromeOnly: 'Smart-spillelister kan bare opprettes på Navidrome-servere.',
+  navidromeOnly: 'Smart-spillelister kan bare opprettes på Navidrome-tjenere.',
   loadFailed: 'Kunne ikke laste smart-spillelister fra Navidrome.',
   sortRandom: 'Sortering: tilfeldig',
   sortTitleAsc: 'Sortering: tittel A-Å',

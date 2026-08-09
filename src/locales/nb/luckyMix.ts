@@ -1,6 +1,6 @@
 export const luckyMix = {
   done: 'Lykkemiks klar: {{count}} spor',
   failed: 'Kunne ikke lage Lykkemiksen. Prøv igjen.',
-  unavailable: 'Lykkemiks er ikke tilgjengelig for denne serveren.',
+  unavailable: 'Lykkemiks er ikke tilgjengelig for denne tjeneren.',
   cancelTooltip: 'Avbryt Lykkemiks-bygging',
 };
